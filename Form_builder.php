@@ -7,16 +7,16 @@ class Form_builder
 	// PUBLIC METHODS //
 	////////////////////
 
-	public function generate($fields = array(), $form_tags = true, $submit_options = array())
+	public function generate($fields = array(), $form_tags = true, $validation = true, $submit_options = array())
 	{
 		$html = ( $form_tags ? form_open() : '');
-			$html .= ( $form_tags ? validation_errors() : '');
+			$html .= ( $form_tags && $validation ? validation_errors() : '');
 
 			foreach ( $fields as $index => $field ) {
 				$html .= $this->{$field['type']}($field);
 			}
 
-			$html .= ( $form_tags ? $this->submit($submit_options) : '');
+			$html .= ( $form_tags || $submit_options ? $this->submit($submit_options) : '');
 	
 		$html .= ( $form_tags ? form_close() : '');
 		
@@ -45,6 +45,15 @@ class Form_builder
 	 * GENERATE DRODOWN FIELD
 	 */
 	public function dropdown($options, $label = true, $help = true)
+	{
+		return $this->field_wrapper( $this->input($options), ( $label ? $this->label($options) : '' ), ( $help ? $this->help($options) : '' ) );
+	}
+
+
+	/**
+	 * GENERATE CHECKBOX FIELD
+	 */
+	public function checkbox($options, $label = true, $help = true)
 	{
 		return $this->field_wrapper( $this->input($options), ( $label ? $this->label($options) : '' ), ( $help ? $this->help($options) : '' ) );
 	}
@@ -121,7 +130,7 @@ class Form_builder
 
 
 	/**
-	 * TEXT
+	 * PASSWORD
 	 */
 	private function input_password($options)
 	{
@@ -135,5 +144,42 @@ class Form_builder
 	private function input_dropdown($options)
 	{
 		return form_dropdown($options['input']);
+	}
+
+	
+	/**
+	 * CHECKBOX
+	 */
+	private function input_checkbox($options)
+	{
+		if ( ! empty($options['input'][0]) && is_array($options['input'][0]) ) {
+			$html = '';
+
+			// LOOP THROUGH MANY CHECKBOXES
+			foreach ( $options['input'] as $input ) {
+				$html .= $this->input_checkbox( array( 'input' => $input ) );
+			}
+
+			return $html;
+		} else {
+
+			// ADD LABEL
+			$options['input']['label'] = ! empty($options['input']['label']) ? $options['input']['label'] : '';
+
+			// ADD BOOTSTRAP CLASS
+			$options['input']['class'] = ! empty($options['input']['class']) ? $options['input']['class'] . ' custom-control-input' : 'custom-control-input';
+				
+			// ADD FIELD ID
+			$options['input']['id'] = ! empty($options['input']['id']) ? $options['input']['id'] : url_title($options['input']['name']);
+
+			// GENERATE FORM
+			$html = '<div class="custom-control custom-checkbox">';
+				$html .= isset($options['default']) ? form_hidden($options['input']['name'], $options['default']) : '';
+				$html .= form_checkbox($options['input']);
+				$html .= '<label class="custom-control-label" for="' . $options['input']['id'] . '">' . $options['input']['label'] . '</label>';
+			$html .= '</div>';
+
+			return $html;
+		}
 	}
 }
