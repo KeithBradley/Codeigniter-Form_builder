@@ -1,5 +1,5 @@
 # Codeigniter-Form_builder
-Very simple library for assisting with bootstrap 4 forms.
+Very simple library for building bootstrap 4 forms in Codeigniter.
 
 The library only includes text, password and dropdown fields currently. They can easily be added though by editing the library.
 
@@ -21,7 +21,7 @@ $this->data['fields'] = array(
 				'label' => 'Email Address',
 				'input' => array(
 					'name' => 'auth[email]',
-          'value' => '' // $this->form_validation->set_value()
+					'value' => '' // $this->form_validation->set_value()
 				)
 			),
 			'password' => array(
@@ -30,7 +30,7 @@ $this->data['fields'] = array(
 				'help' => 'Some help text',
 				'input' => array(
 					'name' => 'auth[password]',
-          'value' => '' // $this->form_validation->set_value()
+					'value' => '' // $this->form_validation->set_value()
 				)
 			)
 		);
