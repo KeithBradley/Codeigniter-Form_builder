@@ -45,10 +45,10 @@ $this->data['submit_btn_options'] = array(
 
 2. On the view call either an individual field with:
 ~~~~
-<?php //echo $this->form_builder->text($fields['email']); ?>
+<?php echo $this->form_builder->text($fields['email']); ?>
 ~~~~
 
 or generate the whole form with: 
 ~~~~
-<?php //echo $this->form_builder->generate($fields, $include_form_tags, $submit_btn_options); ?>
+<?php echo $this->form_builder->generate($fields, $include_form_tags, $submit_btn_options); ?>
 ~~~~
