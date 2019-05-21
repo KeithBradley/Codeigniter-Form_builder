@@ -114,6 +114,8 @@ Params:
 3. Bool to display validation errors
 4. Array of options to pass to the submit button
 
+Note: Repeatable fields are not generated here, they need to be caleed with the repeatable method (See example).
+
 ### input
 1. Array of single field
 
