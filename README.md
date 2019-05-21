@@ -15,6 +15,7 @@ The library only includes text, password, checkbox, checkboxes and dropdown fiel
 Include the class has a field repeater built in, which allows drag-drop ordering and javascript adding/deleting of rows.  
 
 Include these JS libraries:
+
 https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js
 https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js
 https://cdnjs.cloudflare.com/ajax/libs/jquery.repeater/1.2.1/jquery.repeater.js
