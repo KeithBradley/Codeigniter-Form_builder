@@ -9,18 +9,33 @@ class Form_builder
 
 	public function generate($fields = array(), $form_tags = true, $validation = true, $submit_options = array())
 	{
-		$html = ( $form_tags ? form_open() : '');
+		$html = ( $form_tags ? $this->form_open() : '');
 			$html .= ( $form_tags && $validation ? validation_errors() : '');
 
 			foreach ( $fields as $index => $field ) {
 				$html .= $this->{$field['type']}($field);
 			}
 
-			$html .= ( $form_tags || $submit_options ? $this->submit($submit_options) : '');
+			$html .= ( $form_tags || $submit_options ? $this->form_submit($submit_options) : '');
 	
-		$html .= ( $form_tags ? form_close() : '');
+		$html .= ( $form_tags ? $this->form_close() : '');
 		
 		return $html;
+	}
+
+	public function form_open()
+	{
+		return form_open( ( site_url(uri_string(), null, get_instance()->input->get()) ) );
+	}
+
+	public function form_close()
+	{
+		return form_close();
+	}
+
+	public function form_submit($submit_options = array())
+	{
+		return '<hr class="my-4">' . $this->submit($submit_options);
 	}
 
 	/**
@@ -29,6 +44,39 @@ class Form_builder
 	public function text($options, $label = true, $help = true)
 	{
 		return $this->field_wrapper( $this->input($options), ( $label ? $this->label($options) : '' ), ( $help ? $this->help($options) : '' ) );
+	}
+
+
+	/**
+	 * GENERATE DATE FIELD
+	 */
+	public function date($options, $label = true, $help = true)
+	{
+		$hidden_name = $options['input']['name'];
+		$hidden_value = ! empty($options['input']['value']) ? $options['input']['value'] : '';
+
+		$options['input']['value'] = ! empty($options['input']['value']) ? date('m/d/Y', strtotime($options['input']['value'])) : '';
+		$options['input']['class'] = ! isset($options['input']['class']) ? 'date-picker' : $options['input']['class'] . ' date-picker';
+
+		return $this->field_wrapper( $this->input($options) . form_hidden($hidden_name, $hidden_value), ( $label ? $this->label($options) : '' ), ( $help ? $this->help($options) : '' ) );
+	}
+
+
+	/**
+	 * GENERATE TEXTAREA FIELD
+	 */
+	public function textarea($options, $label = true, $help = true)
+	{
+		return $this->field_wrapper( $this->input($options), ( $label ? $this->label($options) : '' ), ( $help ? $this->help($options) : '' ) );
+	}
+
+
+	/**
+	 * GENERATE HIDDN FIELD
+	 */
+	public function hidden($options, $label = true, $help = true)
+	{
+		return $this->input($options);
 	}
 
 
@@ -79,7 +127,7 @@ class Form_builder
 	/**
 	 * ALL INPUTS RUN THROUGH THIS
 	 */
-	private function input($options)
+	public function input($options)
 	{
 		if ( method_exists($this, 'input_' . $options['type']) ) {
 			return $this->{'input_' . $options['type']}($options);
@@ -125,7 +173,41 @@ class Form_builder
 	 */
 	private function input_text($options)
 	{
+		$options['input']['class'] = ! isset($options['input']['class']) ? 'form-control' : $options['input']['class'] . ' form-control';
+
 		return form_input($options['input']);
+	}
+
+
+	/**
+	 * DATE
+	 */
+	private function input_date($options)
+	{
+		$options['input']['class'] = ! isset($options['input']['class']) ? 'form-control' : $options['input']['class'] . ' form-control';
+
+		return form_input($options['input']);
+	}
+
+
+	/**
+	 * TEXTAREA
+	 */
+	private function input_textarea($options)
+	{
+		$options['input']['rows'] = ! isset($options['input']['rows']) ? 5 : $options['input']['class'];
+		$options['input']['class'] = ! isset($options['input']['class']) ? 'form-control' : $options['input']['class'] . ' form-control';
+
+		return form_textarea($options['input']);
+	}
+
+
+	/**
+	 * HIDDEN
+	 */
+	private function input_hidden($options)
+	{
+		return form_hidden($options['input']['name'], $options['input']['value']);
 	}
 
 
@@ -134,6 +216,8 @@ class Form_builder
 	 */
 	private function input_password($options)
 	{
+		$options['input']['class'] = ! isset($options['input']['class']) ? 'form-control' : $options['input']['class'] . ' form-control';
+	
 		return form_password($options['input']);
 	}
 
@@ -143,6 +227,8 @@ class Form_builder
 	 */
 	private function input_dropdown($options)
 	{
+		$options['input']['class'] = ! isset($options['input']['class']) ? 'form-control' : $options['input']['class'] . ' form-control';
+
 		return form_dropdown($options['input']);
 	}
 
@@ -181,5 +267,45 @@ class Form_builder
 
 			return $html;
 		}
+	}
+
+
+	//////////////
+	// REPEATER //
+	//////////////
+
+	public function repeater($view, $group = 'row', $fields = array(), $inline = true)
+	{
+
+		$html = '<div class="repeater">';
+			$html .= '<div data-repeater-list="' . $group . '">';
+				if ( isset($fields[0]) ) {
+					foreach ( $fields as $field_row ) {
+						$html .= '<div data-repeater-item class="p-4 bg-light border">';
+							$html .= '<div class="' . ($inline ? 'r-group d-flex align-items-center' : 'r-group') . '">';
+								$html .= get_instance()->load->view($view, array( 'fields' => $field_row), true);
+								$html .= '<div class="' . ($inline ? 'ml-auto' : '') . '">';
+									$html .= '<span class="btn btn-secondary btn-sm drag mr-1">Move</span>';
+									$html .= '<input data-repeater-delete class="btn btn-danger btn-sm" type="button" value="Delete"/>';
+								$html .= '</div>';
+							$html .= '</div>';
+						$html .= '</div>';
+					}
+				} else {
+					$html .= '<div data-repeater-item class="p-4 bg-light border">';
+						$html .= '<div class="' . ($inline ? 'r-group d-flex align-items-center' : 'r-group') . '">';
+							$html .= get_instance()->load->view($view, array( 'fields' => $fields), true);
+							$html .= '<div class="' . ($inline ? 'ml-auto' : '') . '">';
+								$html .= '<span class="btn btn-secondary btn-sm drag mr-1">Move</span>';
+								$html .= '<input data-repeater-delete class="btn btn-danger btn-sm" type="button" value="Delete"/>';
+							$html .= '</div>';
+						$html .= '</div>';
+					$html .= '</div>';
+				}
+			$html .= '</div>';
+			$html .= '<input data-repeater-create class="btn btn-success btn-sm mt-4" type="button" value="Add Row">';
+		$html .= '</div>';
+		
+		return $html;
 	}
 }
