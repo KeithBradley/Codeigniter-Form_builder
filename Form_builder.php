@@ -108,6 +108,15 @@ class Form_builder
 
 
 	/**
+	 * GENERATE RADIO FIELD
+	 */
+	public function radio($options, $label = true, $help = true)
+	{
+		return $this->field_wrapper( $this->input($options), ( $label ? $this->label($options) : '' ), ( $help ? $this->help($options) : '' ) );
+	}
+
+
+	/**
 	 * GENERATE SUBMIT INPUT
 	 */
 	public function submit($options = array())
@@ -241,9 +250,15 @@ class Form_builder
 		if ( ! empty($options['input'][0]) && is_array($options['input'][0]) ) {
 			$html = '';
 
+			if ( isset($options['inline']) && $options['inline'] ) {
+				$html .= '<div class=""></div>';
+			}
+
 			// LOOP THROUGH MANY CHECKBOXES
 			foreach ( $options['input'] as $input ) {
-				$html .= $this->input_checkbox( array( 'input' => $input ) );
+				$field_settings = $options;
+				$field_settings['input'] = $input;
+				$html .= $this->input_checkbox( $field_settings );
 			}
 
 			return $html;
@@ -259,9 +274,53 @@ class Form_builder
 			$options['input']['id'] = ! empty($options['input']['id']) ? $options['input']['id'] : url_title($options['input']['name']);
 
 			// GENERATE FORM
-			$html = '<div class="custom-control custom-checkbox">';
+			$html = '<div class="custom-control custom-checkbox'  . ( isset($options['inline']) && $options['inline'] ? ' custom-control-inline' : '' ) . '">';
 				$html .= isset($options['default']) ? form_hidden($options['input']['name'], $options['default']) : '';
 				$html .= form_checkbox($options['input']);
+				$html .= '<label class="custom-control-label" for="' . $options['input']['id'] . '">' . $options['input']['label'] . '</label>';
+			$html .= '</div>';
+
+			return $html;
+		}
+	}
+
+	
+	/**
+	 * RADIO
+	 */
+	private function input_radio($options)
+	{
+		if ( ! empty($options['input'][0]) && is_array($options['input'][0]) ) {
+			$html = '';
+
+			if ( isset($options['inline']) && $options['inline'] ) {
+				$html .= '<div class=""></div>';
+			}
+
+			// LOOP THROUGH MANY CHECKBOXES
+			foreach ( $options['input'] as $input ) {
+				$field_settings = $options;
+				$field_settings['input'] = $input;
+				$html .= $this->input_radio( $field_settings );
+			}
+
+			return $html;
+		} else {
+
+			// ADD LABEL
+			$options['input']['label'] = ! empty($options['input']['label']) ? $options['input']['label'] : '';
+
+			// ADD BOOTSTRAP CLASS
+			$options['input']['class'] = ! empty($options['input']['class']) ? $options['input']['class'] . ' custom-control-input' : 'custom-control-input';
+				
+			// ADD FIELD ID
+			$options['input']['id'] = ( ! empty($options['input']['id']) ? $options['input']['id'] : url_title($options['input']['name']) )
+									. ( ! empty($options['input']['value']) ? '_' . $options['input']['value'] : '_' . rand(100,9999) );
+
+			// GENERATE FORM
+			$html = '<div class="custom-control custom-radio' . ( isset($options['inline']) && $options['inline'] ? ' custom-control-inline' : '' ) . '">';
+				// $html .= isset($options['default']) ? form_hidden($options['input']['name'], $options['default']) : '';
+				$html .= form_radio($options['input']);
 				$html .= '<label class="custom-control-label" for="' . $options['input']['id'] . '">' . $options['input']['label'] . '</label>';
 			$html .= '</div>';
 
